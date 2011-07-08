@@ -1,1 +1,26 @@
-Collaborative chatterbot project for the Clojure Meetup on 2011-07-07.
+Collaborative chatterbot project.
+
+Kicked off at the Clojure Meetup on 2011-07-07.
+
+
+For now, agreement is that
+
+
+
+Some interesting directions for this project:
+
+- Look for the answer using a search engine, an api (wolfram alpha),
+- ask a human (eg as a gateway to mturk)
+- ask a dataset (Crunchbase, Factual)
+- translation
+
+- introspection and learning for what responders/templates work and what do not
+
+- handling failures (logging out eg responder or template errors)
+
+- services tiers
+- support for distributed society of elizas
+- scoring of responses
+
+hook it up to a voice rec service:
+http://tropo.com/
