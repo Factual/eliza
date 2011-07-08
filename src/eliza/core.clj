@@ -89,7 +89,7 @@
   (= (canon-str s1) (canon-str s2)))
 
 (defn user-has-said? [s]
-  (some #(canon-match (first %) s) @*history*))
+  (some #(canon-match? s (first %)) @*history*))
 
 (defn eliza-has-said? [s]
   (some #(canon-match? s (second %)) @*history*))
