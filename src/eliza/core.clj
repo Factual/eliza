@@ -68,3 +68,8 @@
       (println (chat input))
       (recur))))
 
+(defn user-has-said? [s]
+  (some #(= (first %) s) @*history*))
+
+(defn eliza-has-said? [s]
+  (some #(= (second %) s) @*history*))
