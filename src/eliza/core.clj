@@ -60,3 +60,11 @@
         response (responder line)]
     (swap! *history* conj [line response])
     response))
+
+(defn chat-loop []
+  (loop []
+    (print "eliza> ")
+    (when-let [input (not-empty (read-line))]
+      (println (chat input))
+      (recur))))
+
