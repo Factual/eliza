@@ -30,4 +30,3 @@
 
 (defn eliza-has-said? [s]
   (some #(canon-match? s (second %)) @*history*))
-
