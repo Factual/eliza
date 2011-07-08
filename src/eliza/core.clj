@@ -38,38 +38,59 @@
         response-word (if (= "?" (match 2)) "ask" "say")]
     (str "Why do you " response-word " '" body "'?")))
 
-(defn simple-responder [line]
-  (cond (and (re-find #"[?]$" line)
-             (< 0.5 (rand)))
-        (rand-nth *simple-question-responses*)
+(defn simple-responder [map]
+  (let [line (:input map)
+        response (cond (and (re-find #"[?]$" line)
+                   (< 0.5 (rand)))
+              (rand-nth *simple-question-responses*)
 
-        (and (re-find #"I|me|you" line)
-             (< 0.5 (rand)))
-        (reflect-input line)
-        
-        :default
-        (rand-nth *simple-default-responses*)
-    )
-  )
+              (and (re-find #"I|me|you" line)
+                   (< 0.5 (rand)))
+              (reflect-input line)
+              
+              :default
+              (rand-nth *simple-default-responses*)
+              )]
+    {:output response}))
+
+(letfn [(tokenize [s]
+          (re-seq #"\w+" (str/lower-case s)))]
+  (defn wrap-tokenizing [responder]
+    (fn [input-hash]
+      (let [{:keys [input]} input-hash
+            parsed (tokenize input)]
+        (responder (assoc input-hash
+                     :tokens parsed))))))
 
 (def *all-responders*
-  [simple-responder])
+  (atom {}))
 
-(defn chat [line]
-  (let [responder (rand-nth *all-responders*)
-        response (responder line)]
-    (swap! *history* conj [line response])
-    response))
+(defn register-responder [key responder]
+  (swap! *all-responders* assoc key responder)) 
+
+(register-responder "simple" simple-responder)
+
+(defn chat [input-map]
+  (let [response-map (some #(% input-map) (vals @*all-responders*))]
+    (swap! *history* conj [input-map response-map])
+    response-map))
 
 (defn chat-loop []
   (loop []
     (print "eliza> ")
     (when-let [input (not-empty (read-line))]
-      (println (chat input))
+      (println (:output (chat {:input input})))
       (recur))))
 
+(defn canon-str [s]
+  (str/replace (str/upper-case s) #"[^A-Z]" ""))
+
+(defn canon-match? [s1 s2]
+  (= (canon-str s1) (canon-str s2)))
+
 (defn user-has-said? [s]
-  (some #(= (first %) s) @*history*))
+  (some #(canon-match (first %) s) @*history*))
 
 (defn eliza-has-said? [s]
-  (some #(= (second %) s) @*history*))
+  (some #(canon-match? s (second %)) @*history*))
+
