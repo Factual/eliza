@@ -1,19 +1,11 @@
 (ns eliza.core
   (:use eliza.register)
   (:require [clojure.string :as str]
-            eliza.responders.simple))
+            (eliza.responders simple
+                              delegator)))
 
 ;; pairs of entry/response
 (def *history* (atom []))
-
-(letfn [(tokenize [s]
-          (re-seq #"\w+" (str/lower-case s)))]
-  (defn wrap-tokenizing [responder]
-    (fn [input-hash]
-      (let [{:keys [input]} input-hash
-            parsed (tokenize input)]
-        (responder (assoc input-hash
-                     :tokens parsed))))))
 
 (defn chat [input-map]
   (let [response-map (some #(% input-map) (vals @*all-responders*))]
