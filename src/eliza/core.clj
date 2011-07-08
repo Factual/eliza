@@ -51,8 +51,16 @@
               :default
               (rand-nth *simple-default-responses*)
               )]
-    {:output response})
-  )
+    {:output response}))
+
+(letfn [(tokenize [s]
+          (re-seq #"\w+" (str/lower-case s)))]
+  (defn wrap-tokenizing [responder]
+    (fn [input-hash]
+      (let [{:keys [input]} input-hash
+            parsed (tokenize input)]
+        (responder (assoc input-hash
+                     :tokens parsed))))))
 
 (def *all-responders*
   (atom {}))
@@ -74,3 +82,8 @@
       (println (:output (chat {:input input})))
       (recur))))
 
+(defn user-has-said? [s]
+  (some #(= (first %) s) @*history*))
+
+(defn eliza-has-said? [s]
+  (some #(= (second %) s) @*history*))
