@@ -46,11 +46,20 @@
         (and (re-find #"I|me|you" line)
              (< 0.5 (rand)))
         (reflect-input line)
-        
+
         :default
         (rand-nth *simple-default-responses*)
-    )
+        )
   )
+
+(letfn [(tokenize [s]
+          (re-seq #"\w+" (str/lower-case s)))]
+  (defn wrap-tokenizing [responder]
+    (fn [input-hash]
+      (let [{:keys [input]} input-hash
+            parsed (tokenize input)]
+        (responder (assoc input-hash
+                     :tokens parsed))))))
 
 (def *all-responders*
   [simple-responder])
