@@ -38,33 +38,39 @@
         response-word (if (= "?" (match 2)) "ask" "say")]
     (str "Why do you " response-word " '" body "'?")))
 
-(defn simple-responder [line]
-  (cond (and (re-find #"[?]$" line)
-             (< 0.5 (rand)))
-        (rand-nth *simple-question-responses*)
+(defn simple-responder [map]
+  (let [line (:input map)
+        response (cond (and (re-find #"[?]$" line)
+                   (< 0.5 (rand)))
+              (rand-nth *simple-question-responses*)
 
-        (and (re-find #"I|me|you" line)
-             (< 0.5 (rand)))
-        (reflect-input line)
-        
-        :default
-        (rand-nth *simple-default-responses*)
-    )
+              (and (re-find #"I|me|you" line)
+                   (< 0.5 (rand)))
+              (reflect-input line)
+              
+              :default
+              (rand-nth *simple-default-responses*)
+              )]
+    {:output response})
   )
 
 (def *all-responders*
-  [simple-responder])
+  (atom {}))
 
-(defn chat [line]
-  (let [responder (rand-nth *all-responders*)
-        response (responder line)]
-    (swap! *history* conj [line response])
-    response))
+(defn register-responder [key responder]
+  (swap! *all-responders* assoc key responder)) 
+
+(register-responder "simple" simple-responder)
+
+(defn chat [input-map]
+  (let [response-map (some #(% input-map) (vals @*all-responders*))]
+    (swap! *history* conj [input-map response-map])
+    response-map))
 
 (defn chat-loop []
   (loop []
     (print "eliza> ")
     (when-let [input (not-empty (read-line))]
-      (println (chat input))
+      (println (:output (chat {:input input})))
       (recur))))
 
