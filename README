@@ -3,8 +3,8 @@ Collaborative chatterbot project.
 Kicked off at the Clojure Meetup on 2011-07-07.
 
 
-For now, agreement is that
-
+For now, agreement is that an input map with key :input is processed,
+and map with key :output is produced
 
 
 Some interesting directions for this project:
