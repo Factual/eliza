@@ -2,7 +2,7 @@
   (:require [clojure.string :as s]))
 
 (defn tokenize [s]
-  (re-seq #"\w+" (s/lower-case s)))
+  (re-seq #"(?:\w|')+" (s/lower-case s)))
 
 (defn wrap-tokenizing [responder]
   (fn [input-hash]

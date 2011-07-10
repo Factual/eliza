@@ -1,5 +1,5 @@
 (ns eliza.core
-  (:use eliza.register)
+  (:use [eliza.register :only [*all-responders* register-responder]])
   (:require [clojure.string :as str]
             (eliza.responders simple
                               delegator)))
@@ -9,15 +9,14 @@
 
 (def default-responder
   (let [question-responses
-        ["Why do you ask?"
-         "I have no idea."
+        ["I have no idea."
          "I wish I knew."
          "I haven't got a clue."
          ]
         statement-responses
-        ["How does that make you feel?"
-         "What would your mother say about that?"
-         "Are you sure?"
+        ["I don't know much about that."
+         "I'm no expert on that."
+         "I don't have much to say about that."
          ]]
     (fn [{input :input}]
       {:output (rand-nth (if (= \? (last input))
@@ -32,7 +31,7 @@
 
 (defn chat-loop []
   (loop []
-    (print "eliza> ")
+    (print "Eliza> ")
     (flush)
     (when-let [input (not-empty (read-line))]
       (println (:output (chat {:input (str/trim input)})))

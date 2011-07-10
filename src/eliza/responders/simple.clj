@@ -1,31 +1,29 @@
 (ns eliza.responders.simple
-  (:use eliza.register)
+  (:use [eliza.register :only [register-responder]]
+        [eliza.utils :only [wrap-tokenizing]])
   (:require [clojure.string :as str]))
 
-(def *swap-me-you-pairs*
-  [["me" "y%u"]
-   ["I" "y%u"]
-   ["am" "a%e"]
-   ["you" "I"]
-   ["are" "am"]
-   ["y%u" "you"]
-   ["a%e" "are"]])
+(def reflect-input
+  (let [swap-me-you {"me" "you"
+                     "i" "you"
+                     "i'm" "you're"
+                     "am" "are"
+                     "you" "I"
+                     "you're" "I'm"
+                     "are" "am"}]
+    (wrap-tokenizing
+     (fn [{tokens :tokens input :input}]
+       (let [swapped-tokens (map #(or (swap-me-you %) %)
+                                 tokens)
+             body (str/replace (str/join " " swapped-tokens)
+                               #"I$" "me")
+             response-word (if (= \? (last input)) "ask" "say")]
+         (str "Why do you " response-word " " body "?"))
+       ))))
 
-(defn swap-me-you [line]
-  (reduce #(apply str/replace %1 %2)
-          line *swap-me-you-pairs*))
-
-(defn reflect-input [line]
-  (let [match (re-find #"(.*)([!.?])?$" line)
-        body (swap-me-you
-              (str/trim
-               (match 1)))
-        response-word (if (= "?" (match 2)) "ask" "say")]
-    (str "Why do you " response-word " '" body "'?")))
-
-(defn simple-responder [{input :input}]
-  (when (and (re-find #"I|me|you" input)
+(defn simple-responder [{input :input :as input-map}]
+  (when (and (re-find #"I|[mM]e|[yY]ou" input)
              (< 0.5 (rand)))
-    {:output (reflect-input input)}))
+    {:output (reflect-input input-map)}))
 
 (register-responder ::simple simple-responder)
