@@ -1,12 +1,14 @@
 (ns eliza.utils
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as str]))
 
-(defn tokenize [s]
-  (re-seq #"(?:\w|')+" (s/lower-case s)))
+(defn canon-str [s]
+  (str/replace (str/upper-case s) #"[^A-Z]" ""))
 
-(defn wrap-tokenizing [responder]
-  (fn [input-hash]
-    (let [{:keys [input]} input-hash
-          parsed (tokenize input)]
-      (responder (assoc input-hash
-                   :tokens parsed)))))
+(defn canon-match? [s1 s2]
+  (= (canon-str s1) (canon-str s2)))
+
+(defn user-has-said? [s]
+  (some #(canon-match? s (first %)) @*history*))
+
+(defn eliza-has-said? [s]
+  (some #(canon-match? s (second %)) @*history*))
