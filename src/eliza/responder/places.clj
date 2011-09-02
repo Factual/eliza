@@ -3,9 +3,6 @@
   (:require [clojure.contrib.pprint :as pprint])
   (:use [clojure.string :only (join)]))
 
-;;(def FACTUAL-KEY "qwsBU2rRRrcSjv4kgqbAHjbAWP2OvY7BMbmisXoi")
-;;(def FACTUAL-SECRET "fVFiie2DTlu2LyWRIseZcjlSiuGN06xD6h80DVjp")
-
 (declare *locality*)
 
 (defn obs [c]
@@ -25,7 +22,6 @@
 (def K "djfOH2eEEepFwi4xtdoNUwoNJC2BiL7OZozvfKbv")
 (def S "sISvvr2QGyh2YlJEVfrMpwyFvhTA06kQ6u80QIwc")
 
-;;(places/factual! FACTUAL-KEY FACTUAL-SECRET)
 (places/factual! (obsr K) (obsr S))
 
 (defn demo [term]
