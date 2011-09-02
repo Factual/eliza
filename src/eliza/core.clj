@@ -1,96 +1,46 @@
 (ns eliza.core
+  (:use eliza.middleware
+        [eliza.responder reflector delegator])
   (:require [clojure.string :as str]))
 
-;; pairs of entry/response
+;; pairs of entry/response maps
 (def *history* (atom []))
 
-(def *simple-question-responses*
-  ["Why do you ask?"
-   "I have no idea."
-   "I wish I knew."
-   "I haven't got a clue."
-   ])
+(defn default-responder [input-map]
+  (let [question-responses  ["I have no idea."
+                             "I wish I knew."
+                             "I haven't got a clue."]
+        statement-responses ["I don't know much about that."
+                             "I'm no expert on that."
+                             "I don't have much to say about that."]]
+    {:output (rand-nth (if (:question? input-map)
+                         question-responses
+                         statement-responses))}))
 
-(def *simple-default-responses*
-  ["How does that make you feel?"
-   "What would your mother say about that?"
-   "Are you sure?"
-   ])
+(defn wrap-responder [default-responder other-responder]
+  (fn [input-map]
+    (let [responder-response (other-responder input-map)]
+      (if responder-response
+        responder-response
+        (default-responder input-map)))))
 
-(def *swap-me-you-pairs*
-  [["me" "y%u"]
-   ["I" "y%u"]
-   ["am" "a%e"]
-   ["you" "I"]
-   ["are" "am"]
-   ["y%u" "you"]
-   ["a%e" "are"]])
+(def app
+  (-> default-responder
+      (wrap-responder reflector-responder)
+      (wrap-responder delegator-responder)
+      wrap-tokenizing
+      wrap-is-question?))
 
-(defn swap-me-you [line]
-  (reduce #(apply str/replace %1 %2)
-          line *swap-me-you-pairs*))
-
-(defn reflect-input [line]
-  (let [match (re-find #"(.*)([!.?])$" line)
-        body (swap-me-you
-              (str/trim
-               (match 1)))
-        response-word (if (= "?" (match 2)) "ask" "say")]
-    (str "Why do you " response-word " '" body "'?")))
-
-(defn simple-responder [map]
-  (let [line (:input map)
-        response (cond (and (re-find #"[?]$" line)
-                   (< 0.5 (rand)))
-              (rand-nth *simple-question-responses*)
-
-              (and (re-find #"I|me|you" line)
-                   (< 0.5 (rand)))
-              (reflect-input line)
-              
-              :default
-              (rand-nth *simple-default-responses*)
-              )]
-    {:output response}))
-
-(letfn [(tokenize [s]
-          (re-seq #"\w+" (str/lower-case s)))]
-  (defn wrap-tokenizing [responder]
-    (fn [input-hash]
-      (let [{:keys [input]} input-hash
-            parsed (tokenize input)]
-        (responder (assoc input-hash
-                     :tokens parsed))))))
-
-(def *all-responders*
-  (atom {}))
-
-(defn register-responder [key responder]
-  (swap! *all-responders* assoc key responder)) 
-
-(register-responder "simple" simple-responder)
-
-(defn chat [input-map]
-  (let [response-map (some #(% input-map) (vals @*all-responders*))]
-    (swap! *history* conj [input-map response-map])
-    response-map))
+(defn query [input]
+  (let [input-map {:input input}
+        output-map (app input-map)]
+    (swap! *history* conj [input-map output-map])
+    (:output output-map)))
 
 (defn chat-loop []
   (loop []
-    (print "eliza> ")
+    (print "Eliza> ")
+    (flush)
     (when-let [input (not-empty (read-line))]
-      (println (:output (chat {:input input})))
+      (println (query (str/trim input)))
       (recur))))
-
-(defn canon-str [s]
-  (str/replace (str/upper-case s) #"[^A-Z]" ""))
-
-(defn canon-match? [s1 s2]
-  (= (canon-str s1) (canon-str s2)))
-
-(defn user-has-said? [s]
-  (some #(canon-match? s (first %)) @*history*))
-
-(defn eliza-has-said? [s]
-  (some #(canon-match? s (second %)) @*history*))
-
