@@ -49,13 +49,16 @@
       {:output "I don't know of such a place. Sorry."}
       {:output (str "Well, I know of '" (:name hit) "' at " (:address hit))})))
 
+(defn where-am []
+  {:output (if *locality*
+             (str "You said you're in " *locality*)
+             ("I don't know, where are you?"))})
+
 (defn places-responder
   "Attempts to handle locality messages like 'i'm in ...' and 'where is ...?'"
   [input-map]
   (let [[tok1 tok2 & more] (:tokens input-map)]
-    (if (= ["i'm" "in"] [tok1 tok2])
-      (im-in (join " " more))
-(if (= ["where" "is"] [tok1 tok2])
-      (where-is (apply str more)))
-      )
-    ))
+    (condp = [tok1 tok2]
+        ["i'm" "in"] (im-in (join " " more))
+        ["where" "is"] (where-is (apply str more))
+        ["where" "am"] (where-am))))
