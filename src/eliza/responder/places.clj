@@ -54,6 +54,8 @@
   [input-map]
   (let [[tok1 tok2 & more] (:tokens input-map)]
     (if (= ["i'm" "in"] [tok1 tok2])
-      (im-in (join " " more)))
-    (if (= ["where" "is"] [tok1 tok2])
-      (where-is (apply str more)))))
+      (im-in (join " " more))
+(if (= ["where" "is"] [tok1 tok2])
+      (where-is (apply str more)))
+      )
+    ))
