@@ -19,10 +19,9 @@
 
 (defn wrap-responder [default-responder other-responder]
   (fn [input-map]
-    (let [responder-response (other-responder input-map)]
-      (if responder-response
-        responder-response
-        (default-responder input-map)))))
+    (if-let [responder-response (other-responder input-map)]
+      responder-response
+      (default-responder input-map))))
 
 (def app
   (-> default-responder
