@@ -24,10 +24,11 @@
 
 (places/factual! (obsr K) (obsr S))
 
-(defn demo [term]
-  (pprint/pprint (places/fetch :places :limit 3 :filters {:name {:$eq term}})))
-
-(defn im-in [locality]
+(defn im-in
+  "Determines whether locality is known. If known, updates internal *locality* and
+   replies with a locality related response. If not known, replies with a negative
+   response."
+  [locality]
   (let [valid (first (places/fetch :places :limit 1 :filters {:locality locality}))]
     (if valid
       (do
@@ -37,16 +38,22 @@
                             (str "How long have you been in " locality "?")])})
       {:output (str "I've never heard of " locality)})))
 
-(defn where-is [term]
+(defn where-is
+  "Tries to find a place that matches term, in current *locality*. If a place is
+   found, responds with some information about it. Otherwise, replies with a
+   negative response."
+  [term]
   (let [hits (places/fetch :places :limit 1 :q term :filters {:locality *locality* :name {:$search term}})
         hit (first hits)]
     (if (empty? hits)
       {:output "I don't know of such a place. Sorry."}
       {:output (str "Well, I know of '" (:name hit) "' at " (:address hit))})))
 
-(defn places-responder [input-map]
+(defn places-responder
+  "Attempts to handle locality messages like 'i'm in ...' and 'where is ...?'"
+  [input-map]
   (let [[tok1 tok2 & more] (:tokens input-map)]
+    (if (= ["i'm" "in"] [tok1 tok2])
+      (im-in (join " " more)))
     (if (= ["where" "is"] [tok1 tok2])
-      (where-is (apply str more))
-      (if (= ["i'm" "in"] [tok1 tok2])
-        (im-in (join " " more))))))
+      (where-is (apply str more)))))
