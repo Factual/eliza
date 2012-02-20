@@ -1,32 +1,46 @@
 (ns eliza.core
-  (:use eliza.register)
-  (:require [clojure.string :as str]
-            (eliza.responders simple
-                              delegator)))
+  (:use eliza.middleware
+        [eliza.responder reflector delegator places])
+  (:require [clojure.string :as str]))
 
-;; pairs of entry/response
+;; pairs of entry/response maps
 (def *history* (atom []))
 
-(defn chat [input-map]
-  (let [response-map (some #(% input-map) (vals @*all-responders*))]
-    (swap! *history* conj [input-map response-map])
-    response-map))
+(defn default-responder [input-map]
+  (let [question-responses  ["I have no idea."
+                             "I wish I knew."
+                             "I haven't got a clue."]
+        statement-responses ["I don't know much about that."
+                             "I'm no expert on that."
+                             "I don't have much to say about that."]]
+    {:output (rand-nth (if (:question? input-map)
+                         question-responses
+                         statement-responses))}))
+
+(defn wrap-responder [default-responder other-responder]
+  (fn [input-map]
+    (if-let [responder-response (other-responder input-map)]
+      responder-response
+      (default-responder input-map))))
+
+(def app
+  (-> default-responder
+      (wrap-responder reflector-responder)
+      (wrap-responder delegator-responder)
+      (wrap-responder places-responder)
+      wrap-tokenizing
+      wrap-is-question?))
+
+(defn query [input]
+  (let [input-map {:input input}
+        output-map (app input-map)]
+    (swap! *history* conj [input-map output-map])
+    (:output output-map)))
 
 (defn chat-loop []
   (loop []
-    (print "eliza> ")
+    (print "Eliza> ")
+    (flush)
     (when-let [input (not-empty (read-line))]
-      (println (:output (chat {:input input})))
+      (println (query (str/trim input)))
       (recur))))
-
-(defn canon-str [s]
-  (str/replace (str/upper-case s) #"[^A-Z]" ""))
-
-(defn canon-match? [s1 s2]
-  (= (canon-str s1) (canon-str s2)))
-
-(defn user-has-said? [s]
-  (some #(canon-match? s (first %)) @*history*))
-
-(defn eliza-has-said? [s]
-  (some #(canon-match? s (second %)) @*history*))
