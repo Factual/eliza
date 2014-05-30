@@ -4,7 +4,7 @@
   (:require [clojure.string :as str]))
 
 ;; pairs of entry/response maps
-(def *history* (atom []))
+(def history (atom []))
 
 (defn default-responder [input-map]
   (let [question-responses  ["I have no idea."
@@ -34,7 +34,7 @@
 (defn query [input]
   (let [input-map {:input input}
         output-map (app input-map)]
-    (swap! *history* conj [input-map output-map])
+    (swap! history conj [input-map output-map])
     (:output output-map)))
 
 (defn chat-loop []
