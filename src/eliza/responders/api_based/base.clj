@@ -1,5 +1,5 @@
 (ns eliza.responders.api-based.base
-  (:use eliza.register :only (register-responder)))
+  (:require [eliza.register :refer [register-responder]]))
 
 
 ;; some helpers
