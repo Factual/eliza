@@ -1,6 +1,6 @@
 (ns eliza.core
   (:use eliza.middleware
-        [eliza.responder reflector delegator places])
+        [eliza.responder reflector delegator])
   (:require [clojure.string :as str]))
 
 ;; pairs of entry/response maps
@@ -27,7 +27,6 @@
   (-> default-responder
       (wrap-responder reflector-responder)
       (wrap-responder delegator-responder)
-      (wrap-responder places-responder)
       wrap-tokenizing
       wrap-is-question?))
 
