@@ -1,0 +1,43 @@
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>
+(function($) {
+  function youSay(input) {
+    $('#chat').append('You  > ' + input + '\n');
+  }
+
+  function elizaSays(output) {
+    $('#chat').append('Eliza> ' + output + '\n');
+  }
+
+  function setException(xhr) {
+    $('#exception').text(xhr.responseText);
+  }
+
+  $(function() {
+    $('#say').keypress(function(evt) {
+      if (evt.which == 13) {
+        var input = $(this).val();
+        youSay(input);
+        $(this).val('');
+
+        $.ajax({
+          type: 'POST',
+          url: '/say',
+          data: {input: input},
+          success: elizaSays,
+          error: setException
+        });
+      }
+    });
+  });
+})(jQuery);
+</script>
+</head>
+<body style='margin-left: 300px;'>
+<strong>Say Something!</strong><input id='say' autofocus/>
+<pre id='chat'></pre>
+<pre id='exception'></pre>
+</body>
+</html>
