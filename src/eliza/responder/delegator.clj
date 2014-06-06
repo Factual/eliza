@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (def delegator-responder
-  (let [people ["Will" "Aaron" "Avram" "Evan" "Daniel"]]
+  (let [people ["Will" "Aaron" "Avram" "Evan" "Daniel" "Guru"]]
     (fn [{[first second & more] :tokens}]
       (when (= ["what" "is"] [first second])
         {:output (str/join " "
