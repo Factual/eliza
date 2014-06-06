@@ -18,4 +18,4 @@
 
 (register-responder! :bored
   #(if (heard-it-before? %) 0.80 0)
-  (fn [input-map] (rand-nth bored-responses)))
+  (fn [input-map] {:output (rand-nth bored-responses)}))

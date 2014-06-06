@@ -18,6 +18,6 @@
       0.75
       0.25))
   (fn [{[first second & more] :tokens}]
-    (format "%s probably know more about %s"
-            (rand-nth people)
-            (or more "that"))))
+    {:output (format "%s probably know more about %s"
+                     (rand-nth people)
+                     (or more "that"))}))

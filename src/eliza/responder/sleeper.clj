@@ -42,4 +42,4 @@
             (do (wake-up!)
                 0)
           :else 0))
-  (fn [input-map] "ZZZZZZzzzZZZZZ..."))
+  (fn [input-map] {:output "ZZZZZZzzzZZZZZ..."}))

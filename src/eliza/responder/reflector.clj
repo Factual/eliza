@@ -25,4 +25,4 @@
 (register-responder! :reflector
   (fn [{input :input :as input-map}]
     (if (re-find #"I|[mM]e|[yY]ou" input) 0.80 0))
-  reflect-input)
+  (fn [input-map] {:output (reflect-input input-map)}))
