@@ -1,5 +1,6 @@
 (ns eliza.responder.bored
-  (:require [eliza.history :refer [history]]))
+  (:require [eliza.register :refer [register-responder!]]
+            [eliza.history  :refer [history]]))
 
 (def bored-responses
   ["BOOOORING"
@@ -14,3 +15,7 @@
   [{:keys [input] :as input-map}]
   (and (heard-it-before? input)
        {:output (rand-nth bored-responses)}))
+
+(register-responder! :bored
+  #(if (heard-it-before? %) 0.80 0)
+  (fn [input-map] (rand-nth bored-responses)))

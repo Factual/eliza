@@ -1,4 +1,5 @@
-(ns eliza.responder.sleeper)
+(ns eliza.responder.sleeper
+  (:require [eliza.register :refer [register-responder!]]))
 
 (def sleeping? (atom false))
 
@@ -31,3 +32,14 @@
     (wake-up?     tokens) (wake-up!))
   (if @sleeping?
     {:output "ZZZZZZzzzZZZZZ..."}))
+
+(register-responder! :sleeper
+  (fn [{:keys [input tokens] :as input-map}]
+    (cond (go-to-sleep? tokens)
+            (do (swap! sleeping? (constantly true))
+                0.99)
+          (wake-up?     tokens)
+            (do (wake-up!)
+                0)
+          :else 0))
+  (fn [input-map] "ZZZZZZzzzZZZZZ..."))

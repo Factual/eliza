@@ -1,5 +1,6 @@
 (ns eliza.responder.reflector
-  (:require [clojure.string :as str]))
+  (:require [eliza.register :refer [register-responder!]]
+            [clojure.string :as str]))
 
 (def reflect-input
   (let [swap-me-you {"me" "you"
@@ -20,3 +21,8 @@
 (defn reflector-responder [{input :input :as input-map}]
   (when (and (re-find #"I|[mM]e|[yY]ou" input))
     {:output (reflect-input input-map)}))
+
+(register-responder! :reflector
+  (fn [{input :input :as input-map}]
+    (if (re-find #"I|[mM]e|[yY]ou" input) 0.80 0))
+  reflect-input)

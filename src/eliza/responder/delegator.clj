@@ -1,5 +1,6 @@
 (ns eliza.responder.delegator
-  (:require [clojure.string :as str]))
+  (:require [eliza.register :refer [register-responder!]]
+            [clojure.string :as str]))
 
 (def delegator-responder
   (let [people ["Will" "Aaron" "Avram" "Evan" "Daniel" "Guru"]]
@@ -9,3 +10,7 @@
                            (list* (rand-nth people)
                                   "probably knows more about"
                                   more))}))))
+
+(register-responder! :delegator
+  (constantly 0)
+  (constantly nil))

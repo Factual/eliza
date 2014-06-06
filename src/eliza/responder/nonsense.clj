@@ -1,5 +1,6 @@
 (ns eliza.responder.nonsense
-  (:require [clojure.string :as string]))
+  (:require [eliza.register :refer [register-responder!]]
+            [clojure.string :as string]))
 
 (def responses
   ["Now you're just talking nonsense!"
@@ -17,3 +18,7 @@
   [{input :input :as input-map}]
   (if (nonsense? input)
     {:output (rand-nth responses)}))
+
+(register-responder! :nonsense
+  #(if (nonsense? %) 0.90 0.20)
+  (fn [input-map] (rand-nth responses)))
