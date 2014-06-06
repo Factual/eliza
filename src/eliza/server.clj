@@ -21,9 +21,16 @@
   (POST "/say" [] say-something)
   (route/not-found "No such thing."))
 
+(defn wrap-dir-index [handler]
+  (fn [req]
+    (handler
+     (update-in req [:uri]
+                #(if (= "/" %) "/chat.html" %)))))
+
 (def app
   (-> eliza-handlers
       (wrap-resource "public")
+      wrap-dir-index
       wrap-keyword-params
       wrap-params))
 
