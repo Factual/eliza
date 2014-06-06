@@ -1,10 +1,12 @@
 (ns eliza.core
-  (:use eliza.middleware
-        [eliza.responder reflector delegator])
-  (:require [eliza.responder.nonsense :refer [nonsense-responder]]
-            [eliza.responder.sleeper  :refer [sleeper-responder]]
-            [eliza.responder.bored    :refer [bored-responder]]
-            [eliza.history            :refer [add-to-history!]]
+  (:require [eliza.register :refer [responders]]
+            [eliza.responder.nonsense]
+            [eliza.responder.sleeper]
+            [eliza.responder.bored]
+            [eliza.responder.reflector]
+            [eliza.responder.delegator]
+            [eliza.history    :refer [add-to-history!]]
+            [eliza.middleware :refer [tokenize is-question?]]
             [clojure.string :as str]))
 
 (defn default-responder [input-map]
@@ -24,19 +26,28 @@
       responder-response
       (default-responder input-map))))
 
-(def app
-  (-> default-responder
-      (wrap-responder bored-responder)
-      (wrap-responder reflector-responder)
-      (wrap-responder delegator-responder)
-      (wrap-responder nonsense-responder)
-      (wrap-responder sleeper-responder)
-      wrap-tokenizing
-      wrap-is-question?))
+(defn wrap-confidence-responder [confidence-fn response-fn]
+  (fn [input-map]
+    {:confidence (confidence-fn input-map)
+     :response-ref (future (response-fn input-map))}))
+
+(defn analyzers [m]
+  (-> m
+      tokenize
+      is-question?))
+
+(def timeout-period 200)
 
 (defn query [input]
-  (let [input-map {:input input}
-        output-map (app input-map)]
+  (let [input-map (analyzers {:input input})
+        sorted-responders (sort-by :confidence 
+                                   (map #(% input-map)
+                                        (vals @responders)))
+        output-map
+        (first (filter #(deref (:response-ref %)
+                               timeout-period
+                               nil)
+                       sorted-responders))]
     (add-to-history! [input-map output-map])
     (:output output-map)))
 
