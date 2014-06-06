@@ -1,7 +1,8 @@
 (ns eliza.core
   (:use eliza.middleware
-        [eliza.responder reflector delegator])
-  (:require [clojure.string :as str]))
+        [eliza.responder reflector delegator sleeper])
+  (:require [eliza.responder.nonsense :refer [nonsense-responder]]
+            [clojure.string :as str]))
 
 ;; pairs of entry/response maps
 (def history (atom []))
@@ -27,6 +28,8 @@
   (-> default-responder
       (wrap-responder reflector-responder)
       (wrap-responder delegator-responder)
+      (wrap-responder nonsense-responder)
+      (wrap-responder sleeper-responder)
       wrap-tokenizing
       wrap-is-question?))
 
