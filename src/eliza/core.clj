@@ -1,11 +1,10 @@
 (ns eliza.core
   (:use eliza.middleware
-        [eliza.responder reflector delegator sleeper])
+        [eliza.responder reflector delegator])
   (:require [eliza.responder.nonsense :refer [nonsense-responder]]
+            [eliza.responder.sleeper  :refer [sleeper-responder]]
+            [eliza.history            :refer [add-to-history!]]
             [clojure.string :as str]))
-
-;; pairs of entry/response maps
-(def history (atom []))
 
 (defn default-responder [input-map]
   (let [question-responses  ["I have no idea."
@@ -36,7 +35,7 @@
 (defn query [input]
   (let [input-map {:input input}
         output-map (app input-map)]
-    (swap! history conj [input-map output-map])
+    (add-to-history! [input-map output-map])
     (:output output-map)))
 
 (defn chat-loop []
