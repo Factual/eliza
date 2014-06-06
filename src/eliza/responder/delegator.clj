@@ -2,15 +2,22 @@
   (:require [eliza.register :refer [register-responder!]]
             [clojure.string :as str]))
 
-(def delegator-responder
-  (let [people ["Will" "Aaron" "Avram" "Evan" "Daniel" "Guru"]]
-    (fn [{[first second & more] :tokens}]
-      (when (= ["what" "is"] [first second])
-        {:output (str/join " "
-                           (list* (rand-nth people)
-                                  "probably knows more about"
-                                  more))}))))
+(def people ["Will" "Aaron" "Avram" "Evan" "Daniel" "Guru"])
+
+(defn delegator-responder
+  [{[first second & more] :tokens}]
+  (when (= ["what" "is"] [first second])
+    {:output (str/join " "
+                       (list* (rand-nth people)
+                              "probably knows more about"
+                              more))}))
 
 (register-responder! :delegator
-  (constantly 0)
-  (constantly nil))
+  (fn [{[first second & more] :tokens}]
+    (if (= ["what" "is"] [first second])
+      0.75
+      0.25))
+  (fn [{[first second & more] :tokens}]
+    (format "%s probably know more about %s"
+            (rand-nth people)
+            (or more "that"))))
