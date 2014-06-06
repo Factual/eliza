@@ -1,7 +1,9 @@
 (ns eliza.core
   (:use eliza.middleware
         [eliza.responder reflector delegator])
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.core.async :as async]
+            ))
 
 ;; pairs of entry/response maps
 (def history (atom []))
