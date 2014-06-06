@@ -1,9 +1,9 @@
 (ns eliza.core
   (:use eliza.middleware
-        [eliza.responder reflector delegator])
-  (:require [clojure.string :as str]
-            [clojure.core.async :as async]
-            ))
+        [eliza.responder reflector delegator sleeper])
+  (:require [eliza.responder.nonsense :refer [nonsense-responder]]
+            [clojure.string :as str]))
+
 
 ;; pairs of entry/response maps
 (def history (atom []))
@@ -25,10 +25,17 @@
       responder-response
       (default-responder input-map))))
 
+(defn wrap-confidence-responder [confidence-fn response-fn]
+  (fn [input-map]
+    {:confidence (confidence-fn input-map)
+     :response-ref (future (response-fn input-map))}))
+
 (def app
   (-> default-responder
       (wrap-responder reflector-responder)
       (wrap-responder delegator-responder)
+      (wrap-responder nonsense-responder)
+      (wrap-responder sleeper-responder)
       wrap-tokenizing
       wrap-is-question?))
 
