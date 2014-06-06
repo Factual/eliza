@@ -29,6 +29,8 @@
           success: elizaSays,
           error: setException
         });
+        evt.stopPropagation();
+        return false;
       }
     });
   });
