@@ -1,6 +1,6 @@
 (ns eliza.utils
   (:require [clojure.string :as str]
-            [eliza.core :refer [history]]))
+            [eliza.history :refer [history]]))
 
 (defn canon-str [s]
   (str/replace (str/upper-case s) #"[^A-Z]" ""))

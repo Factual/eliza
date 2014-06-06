@@ -3,6 +3,7 @@
         [eliza.responder reflector delegator])
   (:require [eliza.responder.nonsense :refer [nonsense-responder]]
             [eliza.responder.sleeper  :refer [sleeper-responder]]
+            [eliza.responder.bored    :refer [bored-responder]]
             [eliza.history            :refer [add-to-history!]]
             [clojure.string :as str]))
 
@@ -30,6 +31,7 @@
 
 (def app
   (-> default-responder
+      (wrap-responder bored-responder)
       (wrap-responder reflector-responder)
       (wrap-responder delegator-responder)
       (wrap-responder nonsense-responder)
