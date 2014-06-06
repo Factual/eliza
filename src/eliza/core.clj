@@ -23,6 +23,11 @@
       responder-response
       (default-responder input-map))))
 
+(defn wrap-confidence-responder [confidence-fn response-fn]
+  (fn [input-map]
+    {:confidence (confidence-fn input-map)
+     :response-ref (future (response-fn input-map))}))
+
 (def app
   (-> default-responder
       (wrap-responder reflector-responder)
