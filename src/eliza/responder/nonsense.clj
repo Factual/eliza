@@ -20,5 +20,5 @@
     {:output (rand-nth responses)}))
 
 (register-responder! :nonsense
-  #(if (nonsense? %) 0.90 0.20)
+  #(if (nonsense? (:input %)) 0.90 0.20)
   (fn [input-map] {:output (rand-nth responses)}))
