@@ -2,7 +2,7 @@
   (:require [clojure.string :as s]))
 
 (defn tokenize [m]
-  (if-let [s {m :input}]
+  (if-let [s (:input m)]
     (assoc m :tokens (re-seq #"(?:\w|')+" (s/lower-case s)))
     m))
 
