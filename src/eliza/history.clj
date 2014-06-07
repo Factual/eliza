@@ -1,8 +1,13 @@
 (ns eliza.history)
 
 ;; pairs of entry/response maps
-(def history (atom []))
+(def history-map (atom {}))
 
 (defn add-to-history!
-  [data]
-  (swap! history conj data))
+  [id data]
+  (swap! history-map
+    #(update-in % [id] (fn [hist] (conj (or hist []) data)))))
+
+(defn history
+  [id]
+  (@history-map id []))

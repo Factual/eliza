@@ -8,8 +8,8 @@
    "Now where have I heard that before?"])
 
 (defn heard-it-before?
-  [{:keys [input] :as input-map}]
-  (some #(= input (:input (first %))) @history))
+  [{:keys [input chat-session-id] :as input-map}]
+  (some #(= input (:input (first %))) (history chat-session-id)))
 
 (defn bored-responder
   [{:keys [input] :as input-map}]

@@ -16,8 +16,8 @@
 
 (def timeout-period 200)
 
-(defn query [input]
-  (let [input-map (analyzers {:input input})
+(defn query [input & [chat-session-id]]
+  (let [input-map (analyzers {:input input :chat-session-id chat-session-id})
         sorted-responders (sort-by (comp - :confidence)
                                    (map #(% input-map)
                                         (vals @responders)))
@@ -25,7 +25,8 @@
                                  timeout-period
                                  nil)
                        sorted-responders)]
-    (add-to-history! [input-map output-map])
+    (when chat-session-id
+      (add-to-history! chat-session-id [input-map output-map]))
     (:output output-map)))
 
 (defn chat-loop []
