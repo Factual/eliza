@@ -1,5 +1,6 @@
 (ns eliza.responder.sleeper
-  (:require [eliza.register :refer [register-responder!]]))
+  (:require [eliza.register :refer [register-responder!]]
+            [clojure.string :as string]))
 
 (def sleeping? (atom false))
 
@@ -17,8 +18,10 @@
       (tired?)))
 
 (defn wake-up?
-  [tokens]
-  (= ["wake" "up"] (take 2 tokens)))
+  [{:keys [input tokens] :as input-map}]
+  (or (= ["wake" "up"] (take 2 tokens))
+      (.endsWith input "!!")
+      (= input (string/upper-case input))))
 
 (defn wake-up!
   []
@@ -28,8 +31,8 @@
 (defn sleeper-responder
   [{:keys [input tokens] :as input-map}]
   (cond
-    (go-to-sleep? tokens) (swap! sleeping? (constantly true))
-    (wake-up?     tokens) (wake-up!))
+    (go-to-sleep? tokens)    (swap! sleeping? (constantly true))
+    (wake-up?     input-map) (wake-up!))
   (if @sleeping?
     {:output "ZZZZZZzzzZZZZZ..."}))
 
@@ -38,7 +41,7 @@
     (cond (go-to-sleep? tokens)
             (do (swap! sleeping? (constantly true))
                 0.99)
-          (wake-up?     tokens)
+          (wake-up?     input-map)
             (do (wake-up!)
                 0)
           @sleeping? 0.99
