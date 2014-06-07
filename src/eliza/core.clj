@@ -40,14 +40,13 @@
 
 (defn query [input]
   (let [input-map (analyzers {:input input})
-        sorted-responders (sort-by :confidence 
+        sorted-responders (sort-by (comp - :confidence)
                                    (map #(% input-map)
                                         (vals @responders)))
-        output-map
-        (first (filter #(deref (:response-ref %)
-                               timeout-period
-                               nil)
-                       sorted-responders))]
+        output-map (some #(deref (:response-ref %)
+                                 timeout-period
+                                 nil)
+                       sorted-responders)]
     (add-to-history! [input-map output-map])
     (:output output-map)))
 
