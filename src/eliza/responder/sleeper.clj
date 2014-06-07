@@ -41,5 +41,6 @@
           (wake-up?     tokens)
             (do (wake-up!)
                 0)
+          @sleeping? 0.99
           :else 0))
   (fn [input-map] {:output "ZZZZZZzzzZZZZZ..."}))
